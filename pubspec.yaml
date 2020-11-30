@@ -5,12 +5,12 @@ author: 王贺天<hetian@hetian.me>
 homepage: https://github.com/hetian9288/flutter_qr_reader
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.10.3 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: ^0.6.0+9
+  image_picker: ^0.6.7+14
 
 dev_dependencies:
   flutter_test:
