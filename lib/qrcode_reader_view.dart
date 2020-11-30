@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'flutter_qr_reader.dart';
 import 'package:image_picker/image_picker.dart';
