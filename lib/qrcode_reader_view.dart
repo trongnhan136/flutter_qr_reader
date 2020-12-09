@@ -203,30 +203,30 @@ class QrcodeReaderViewState extends State<QrcodeReaderView>
             ),
             Positioned(
               width: constraints.maxWidth,
-              bottom: constraints.maxHeight == mediaQuery.size.height
-                  ? 12 + mediaQuery.padding.top
-                  : 12,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: _scanImage,
-                    child: Container(
-                      width: 45,
-                      height: 45,
-                      alignment: Alignment.center,
-                      child: Image.asset(
-                        "assets/tool_img.png",
-                        package: "flutter_qr_reader",
-                        width: 25,
-                        height: 25,
-                        color: Colors.white54,
+              bottom: 8,
+              child: SafeArea(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: _scanImage,
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        alignment: Alignment.center,
+                        child: Image.asset(
+                          "assets/tool_img.png",
+                          package: "flutter_qr_reader",
+                          width: 25,
+                          height: 25,
+                          color: Colors.white54,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             )
           ],
