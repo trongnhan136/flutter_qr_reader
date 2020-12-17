@@ -17,6 +17,7 @@ package me.hetian.flutter_qr_reader.readerView;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.Camera;
@@ -32,7 +33,6 @@ import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
-import com.google.zxing.LuminanceSource;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.PlanarYUVLuminanceSource;
@@ -45,6 +45,8 @@ import com.google.zxing.qrcode.QRCodeReader;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Map;
+
+import me.hetian.flutter_qr_reader.DisplayUtils;
 
 import static android.hardware.Camera.getCameraInfo;
 import static me.hetian.flutter_qr_reader.QRCodeDecoder.HINTS;
@@ -89,6 +91,7 @@ public class QRCodeReaderView extends SurfaceView
         if (checkCameraHardware()) {
             mCameraManager = new CameraManager(getContext());
             mCameraManager.setPreviewCallback(this);
+            mCameraManager.setDisplayOrientation(0);
             getHolder().addCallback(this);
             setBackCamera();
         } else {
@@ -364,6 +367,7 @@ public class QRCodeReaderView extends SurfaceView
                 return null;
             }
 
+
             final PlanarYUVLuminanceSource source =
                     view.mCameraManager.buildLuminanceSource(params[0], view.mPreviewWidth,
                             view.mPreviewHeight);
@@ -376,12 +380,26 @@ public class QRCodeReaderView extends SurfaceView
             } catch (ChecksumException e) {
                 SimpleLog.d(TAG, "ChecksumException", e);
             } catch (NotFoundException e) {
+                int width = view.mPreviewWidth;
+                int height = view.mPreviewHeight;
+                byte[] data = params[0];
+                if (DisplayUtils.getScreenOrientation(view.getContext()) == Configuration.ORIENTATION_PORTRAIT) {
+                    int rotationCount = getRotationCount();
+                    if (rotationCount == 1 || rotationCount == 3) {
+                        int tmp = width;
+                        width = height;
+                        height = tmp;
+                    }
+                    data = getRotatedData(params[0]);
+                }
+
+                PlanarYUVLuminanceSource sourceOther = view.mCameraManager.buildLuminanceSource(data, width, height);
                 MultiFormatReader multiFormatReader = new MultiFormatReader();
                 try {
                     SimpleLog.d(TAG, "No QR Code found");
 
-                    LuminanceSource invertedSource = source.invert();
-                    BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(invertedSource));
+//                    LuminanceSource invertedSource = source.invert();
+                    BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(sourceOther));
 
                     return multiFormatReader.decode(binaryBitmap, HINTS);
                 } catch (NotFoundException exception) {
@@ -414,6 +432,37 @@ public class QRCodeReaderView extends SurfaceView
             }
         }
 
+        public byte[] getRotatedData(byte[] data) {
+            final QRCodeReaderView view = viewRef.get();
+
+            int width = view.mPreviewWidth;
+            int height = view.mPreviewHeight;
+
+            int rotationCount = getRotationCount();
+
+            if (rotationCount == 1 || rotationCount == 3) {
+                for (int i = 0; i < rotationCount; i++) {
+                    byte[] rotatedData = new byte[data.length];
+                    for (int y = 0; y < height; y++) {
+                        for (int x = 0; x < width; x++)
+                            rotatedData[x * height + height - y - 1] = data[x + y * width];
+                    }
+                    data = rotatedData;
+                    int tmp = width;
+                    width = height;
+                    height = tmp;
+                }
+            }
+
+            return data;
+        }
+
+        public int getRotationCount() {
+            final QRCodeReaderView view = viewRef.get();
+            int displayOrientation = view.getCameraDisplayOrientation();
+            return displayOrientation / 90;
+        }
+
         /**
          * Transform result to surfaceView coordinates
          * <p>
@@ -438,4 +487,5 @@ public class QRCodeReaderView extends SurfaceView
                     viewSize, cameraPreviewSize);
         }
     }
+
 }
