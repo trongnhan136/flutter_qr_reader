@@ -16,9 +16,9 @@ class QrcodeReaderView extends StatefulWidget {
   QrcodeReaderView({
     Key? key,
     @required this.onScan,
-    this.headerWidget,
+    @required this.headerWidget,
     this.boxLineColor = Colors.cyanAccent,
-    this.helpWidget,
+    @required this.helpWidget,
     this.scanBoxRatio = 0.85,
   }) : super(key: key);
 
